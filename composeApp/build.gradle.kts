@@ -56,11 +56,11 @@ kotlin {
 }
 
 android {
-    namespace = "dev.leoesilva.gatekeeper"
+    namespace = "com.webcrafterszl.gatekeeper"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "dev.leoesilva.gatekeeper"
+        applicationId = "com.webcrafterszl.gatekeeper"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -88,11 +88,11 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "dev.leoesilva.gatekeeper.MainKt"
+        mainClass = "com.webcrafterszl.gatekeeper.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "dev.leoesilva.gatekeeper"
+            packageName = "com.webcrafterszl.gatekeeper"
             packageVersion = "1.0.0"
         }
     }

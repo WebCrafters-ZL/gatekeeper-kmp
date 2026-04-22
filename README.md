@@ -15,6 +15,11 @@ A navegacao principal passa por:
 
 `Login -> Cadastro -> Selecao -> Menus (Administrativo/Autoatendimento) -> CRUDs`
 
+## Equipe
+
+- Caio Cesar Silva Pena ([@caiocesardev](https://github.com/caiocesardev))
+- Leonardo Euripedes da Silva ([@leoesilva](https://github.com/leoesilva))
+
 ## Stack tecnica
 
 - Kotlin Multiplatform

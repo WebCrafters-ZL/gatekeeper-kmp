@@ -1,5 +1,7 @@
 package com.webcrafterszl.gatekeeper.data.remote
 
+import com.webcrafterszl.gatekeeper.data.model.Convite
+import com.webcrafterszl.gatekeeper.data.model.ConviteVisitante
 import com.webcrafterszl.gatekeeper.data.model.CredencialRFID
 import com.webcrafterszl.gatekeeper.data.model.Identificavel
 import com.webcrafterszl.gatekeeper.data.model.Portador
@@ -18,6 +20,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlin.random.Random
 
 class RepositorioRemoto(
 	private val baseUrl: String = "https://gatekeeper-kmp-default-rtdb.firebaseio.com",
@@ -117,4 +120,28 @@ class RepositorioRemoto(
 	}
 
 	suspend fun excluirReserva(id: Int) = deleteItem("reservas", id)
+
+    // Funções para Convites com Link
+    suspend fun criarConvite(userId: Int, dataVisita: String): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        val token = (1..10).map { allowedChars.random() }.joinToString("")
+        val novoId = nextId<Convite>("convites")
+        val convite = Convite(id = novoId, token = token, dataVisita = dataVisita, criadoPorId = userId)
+        putBody("convites", novoId, convite)
+        return "https://gatekeeper.com/invite/$token"
+    }
+
+    suspend fun listarConvites(userId: Int): List<Convite> {
+        val todosConvites = listBody<Convite>("convites")
+        return todosConvites.filter { it.criadoPorId == userId }
+    }
+
+    // Função para Convite de Visitante por E-mail
+    suspend fun enviarConvitePorEmail(convite: ConviteVisitante) {
+        val item = if (convite.id > 0) convite else convite.copy(id = nextId<ConviteVisitante>("convites_visitantes"))
+        putBody("convites_visitantes", item.id, item)
+        // Em um backend real, esta chamada ao putBody acionaria uma Cloud Function/Trigger
+        // que se encarregaria de formatar e enviar o e-mail para o visitante.
+        // Para o frontend, apenas salvar o registro é suficiente.
+    }
 }

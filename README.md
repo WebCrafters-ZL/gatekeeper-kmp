@@ -1,72 +1,73 @@
-This is a Kotlin Multiplatform project targeting Android, Web, Desktop (JVM).
+# GateKeeper
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-    - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-    - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-      For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-      the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-      Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-      folder is the appropriate location.
+Aplicacao Kotlin Multiplatform para controle de acesso, com fluxos de login/seleção e CRUDs conectados ao Firebase Realtime Database.
 
-### Build and Run Android Application
+## Visao geral
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
+O projeto centraliza quatro entidades principais:
 
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+- Portador
+- Credencial RFID
+- Visitante
+- Reserva
 
-### Build and Run Desktop (JVM) Application
+A navegacao principal passa por:
 
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
+`Login -> Cadastro -> Selecao -> Menus (Administrativo/Autoatendimento) -> CRUDs`
 
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:run
-  ```
+## Equipe
 
-### Build and Run Web Application
+- Caio Cesar Silva Pena ([@caiocesardev](https://github.com/caiocesardev))
+- Leonardo Euripedes da Silva ([@leoesilva](https://github.com/leoesilva))
 
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE's toolbar or run it directly from the terminal:
+## Stack tecnica
 
-- for the Wasm target (faster, modern browsers):
-    - on macOS/Linux
-      ```shell
-      ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-      ```
-    - on Windows
-      ```shell
-      .\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
-      ```
-- for the JS target (slower, supports older browsers):
-    - on macOS/Linux
-      ```shell
-      ./gradlew :composeApp:jsBrowserDevelopmentRun
-      ```
-    - on Windows
-      ```shell
-      .\gradlew.bat :composeApp:jsBrowserDevelopmentRun
-      ```
+- Kotlin Multiplatform
+- Compose Multiplatform (UI)
+- Material 3
+- Ktor Client (HTTP)
+- Kotlinx Serialization (JSON)
+- Firebase Realtime Database (persistencia remota)
 
----
+## Estrutura do projeto
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+- `composeApp/src/commonMain/kotlin`: regras compartilhadas, telas, navegacao, viewmodels e repositorio remoto
+- `composeApp/src/androidMain`: codigo especifico Android
+- `composeApp/src/jvmMain`: codigo especifico Desktop (JVM)
+- `composeApp/src/jsMain`: codigo especifico Web (JS)
+- `composeApp/src/wasmJsMain`: codigo especifico WebAssembly
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack
-channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+## Executar localmente
+
+Use os comandos abaixo na raiz do projeto.
+
+### Android (build debug)
+
+```bash
+./gradlew :composeApp:assembleDebug
+```
+
+### Desktop (JVM)
+
+```bash
+./gradlew :composeApp:run
+```
+
+### Web (Wasm)
+
+```bash
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+```
+
+### Web (JS)
+
+```bash
+./gradlew :composeApp:jsBrowserDevelopmentRun
+```
+
+## Arquivos-chave
+
+- `composeApp/src/commonMain/kotlin/com/webcrafterszl/gatekeeper/App.kt`: ponto de entrada da UI e roteamento de telas
+- `composeApp/src/commonMain/kotlin/com/webcrafterszl/gatekeeper/navigation/AppNavigation.kt`: estado de navegacao
+- `composeApp/src/commonMain/kotlin/com/webcrafterszl/gatekeeper/ui/screens/CrudScreens.kt`: telas de CRUD
+- `composeApp/src/commonMain/kotlin/com/webcrafterszl/gatekeeper/data/remote/RepositorioRemoto.kt`: integracao com Firebase Realtime Database

@@ -32,10 +32,10 @@ fun FirstAccessEmailScreen(
 	onBackClick: () -> Unit,
 ) {
 	var email by remember { mutableStateOf("") }
-	var tentouAvancar by remember { mutableStateOf(false) }
+	var submissionAttempted by remember { mutableStateOf(false) }
 	val colorScheme = MaterialTheme.colorScheme
 
-	val emailValido = email.isNotBlank() && "@" in email && "." in email
+	val isEmailValid = email.isNotBlank() && "@" in email && "." in email
 
 	Box(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
 		Column(
@@ -68,8 +68,9 @@ fun FirstAccessEmailScreen(
 						onValueChange = { email = it },
 						label = "E-mail",
 						modifier = Modifier.padding(top = 20.dp),
+						isError = submissionAttempted && !isEmailValid
 					)
-					if (tentouAvancar && !emailValido) {
+					if (submissionAttempted && !isEmailValid) {
 						Text(
 							text = "Informe um e-mail válido para continuar.",
 							style = MaterialTheme.typography.bodySmall,
@@ -81,10 +82,10 @@ fun FirstAccessEmailScreen(
 					AppButton(
 						text = "Enviar Código",
 						modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-						enabled = emailValido,
+						enabled = isEmailValid,
 						onClick = {
-							tentouAvancar = true
-							if (emailValido) {
+							submissionAttempted = true
+							if (isEmailValid) {
 								onNextClick(email)
 							}
 						},

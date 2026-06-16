@@ -10,13 +10,7 @@ sealed interface AppRoute {
 	data class FirstAccessCode(val email: String) : AppRoute
 	data class FirstAccessPassword(val email: String) : AppRoute
 	data object Selection : AppRoute
-	data object AdminMenu : AppRoute
 	data object UserDashboard : AppRoute
-	data object PortadorCrud : AppRoute
-	data object CredencialCrud : AppRoute
-	data object VisitanteCrud : AppRoute
-	data object ReservaCrud : AppRoute
-	data object GerenciadorConvites : AppRoute
     data object FormularioConvite : AppRoute
     data object HistoricoAcessos : AppRoute
     

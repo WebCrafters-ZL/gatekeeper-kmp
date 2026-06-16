@@ -34,12 +34,12 @@ fun FirstAccessPasswordScreen(
 ) {
 	var password by remember { mutableStateOf("") }
 	var confirmPassword by remember { mutableStateOf("") }
-	var tentouSalvar by remember { mutableStateOf(false) }
+	var saveAttempted by remember { mutableStateOf(false) }
 	val colorScheme = MaterialTheme.colorScheme
 
-	val senhaValida = password.length >= 6
-	val senhasCoincidem = password == confirmPassword
-	val formularioValido = senhaValida && senhasCoincidem
+	val isPasswordValid = password.length >= 6
+	val passwordsMatch = password == confirmPassword
+	val isFormValid = isPasswordValid && passwordsMatch
 
 	Box(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
 		Column(
@@ -73,8 +73,9 @@ fun FirstAccessPasswordScreen(
 						label = "Nova Senha",
 						modifier = Modifier.padding(top = 20.dp),
 						secureText = true,
+						isError = saveAttempted && !isPasswordValid
 					)
-					if (tentouSalvar && !senhaValida) {
+					if (saveAttempted && !isPasswordValid) {
 						Text(
 							text = "A senha deve ter pelo menos 6 caracteres.",
 							style = MaterialTheme.typography.bodySmall,
@@ -89,8 +90,9 @@ fun FirstAccessPasswordScreen(
 						label = "Confirmar Senha",
 						modifier = Modifier.padding(top = 12.dp),
 						secureText = true,
+						isError = saveAttempted && !passwordsMatch
 					)
-					if (tentouSalvar && !senhasCoincidem) {
+					if (saveAttempted && !passwordsMatch) {
 						Text(
 							text = "As senhas não coincidem.",
 							style = MaterialTheme.typography.bodySmall,
@@ -102,10 +104,10 @@ fun FirstAccessPasswordScreen(
 					AppButton(
 						text = "Salvar Senha",
 						modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-						enabled = formularioValido,
+						enabled = isFormValid,
 						onClick = {
-							tentouSalvar = true
-							if (formularioValido) {
+							saveAttempted = true
+							if (isFormValid) {
 								onSetPasswordClick(password)
 							}
 						},

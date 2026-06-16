@@ -20,7 +20,7 @@ object KtorClient {
     /**
      * O cliente Ktor configurado para fazer as chamadas de rede.
      */
-    val client: HttpClient = HttpClient {
+    val httpClient: HttpClient = HttpClient {
         // Instala o plugin ContentNegotiation para lidar com a serialização/desserialização de JSON.
         install(ContentNegotiation) {
             json(Json {
@@ -38,6 +38,4 @@ object KtorClient {
             contentType(ContentType.Application.Json)
         }
     }
-
-    val httpClient: HttpClient = client
 }

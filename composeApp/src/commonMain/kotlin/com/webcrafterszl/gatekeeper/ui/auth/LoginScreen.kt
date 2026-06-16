@@ -2,18 +2,6 @@ package com.webcrafterszl.gatekeeper.ui.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import org.jetbrains.compose.resources.painterResource
-import gatekeeper.composeapp.generated.resources.Res
-import gatekeeper.composeapp.generated.resources.gatekeeper_logo
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,38 +11,39 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.webcrafterszl.gatekeeper.ui.components.AppButton
+import com.webcrafterszl.gatekeeper.ui.components.AppTextField
 import com.webcrafterszl.gatekeeper.viewmodel.AuthViewModel
 import com.webcrafterszl.gatekeeper.viewmodel.LoginUiState
 import gatekeeper.composeapp.generated.resources.Res
 import gatekeeper.composeapp.generated.resources.gatekeeper_logo
 import org.jetbrains.compose.resources.painterResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun LoginScreen(
-    // O ViewModel agora é o cérebro da tela.
-    // Usamos a factory do viewModel() para criar uma instância que sobrevive a recomposições.
     viewModel: AuthViewModel = viewModel { AuthViewModel() },
     onLoginSuccess: (String) -> Unit,
     onFirstAccessClick: () -> Unit,
     logoContent: (@Composable () -> Unit)? = null,
 ) {
-    // Observa os estados do ViewModel. A UI será recomposta automaticamente quando eles mudarem.
+    // Observa os estados do ViewModel usando o delegate 'by'. 
+    // A UI será recomposta automaticamente quando eles mudarem.
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
     val loginState by viewModel.loginUiState.collectAsState()
 
-    var showPassword by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
-    // Lógica para navegar quando o estado for Success
+    // LaunchedEffect é usado para lidar com "side effects", como a navegação.
+    // Ele será executado sempre que o 'loginState' mudar.
     LaunchedEffect(loginState) {
         if (loginState is LoginUiState.Success) {
+            // Extrai o token do estado de sucesso e chama a função de navegação.
             val token = (loginState as LoginUiState.Success).token
             onLoginSuccess(token)
-            viewModel.resetState() // Limpa o estado para evitar re-navegação
+            viewModel.resetState() // Limpa o estado para evitar re-navegação em recomposições.
         }
     }
 
@@ -82,40 +71,31 @@ fun LoginScreen(
                 tonalElevation = 2.dp,
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Campo de E-mail vinculado ao ViewModel
-                    OutlinedTextField(
+                    // Campo de E-mail conectado ao ViewModel
+                    AppTextField(
                         value = email,
                         onValueChange = { viewModel.onEmailChange(it) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("E-mail") },
-                        singleLine = true,
+                        label = "E-mail",
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next,
-                        ),
-                        colors = loginTextFieldColors(),
+                        )
                     )
 
-                    // Campo de Senha vinculado ao ViewModel
-                    OutlinedTextField(
+                    // Campo de Senha conectado ao ViewModel
+                    AppTextField(
                         value = password,
                         onValueChange = { viewModel.onPasswordChange(it) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 12.dp),
-                        label = { Text("Senha") },
-                        singleLine = true,
-                        visualTransformation = if (showPassword) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+                        label = "Senha",
+                        secureText = true, // AppTextField já trata a lógica de mostrar/ocultar
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done,
-                        ),
-                        trailingIcon = {
-                            TextButton(onClick = { showPassword = !showPassword }) {
-                                Text(if (showPassword) "Ocultar" else "Mostrar")
-                            }
-                        },
-                        colors = loginTextFieldColors(),
+                        )
                     )
 
                     // Tratamento de estados da UI (Loading e Error)
@@ -135,15 +115,18 @@ fun LoginScreen(
                                 modifier = Modifier.padding(top = 8.dp)
                             )
                         }
-                        else -> {} // Idle e Success não mostram nada aqui
+                        else -> {} // Idle e Success não precisam renderizar nada aqui.
                     }
 
-                    PrimaryActionButton(
+                    // Botão de ação principal conectado ao ViewModel
+                    AppButton(
+                        text = "Entrar",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 20.dp),
-                        // O botão fica desabilitado enquanto carrega
-                        enabled = loginState !is LoginUiState.Loading,
+                            .padding(top = 20.dp)
+                            .height(50.dp),
+                        // O botão fica desabilitado enquanto carrega ou se os campos estiverem vazios.
+                        enabled = loginState !is LoginUiState.Loading && email.isNotBlank() && password.isNotBlank(),
                         onClick = { viewModel.login() },
                     )
 
@@ -177,30 +160,3 @@ private fun DefaultLoginLogo() {
         modifier = Modifier.size(150.dp)
     )
 }
-
-@Composable
-private fun PrimaryActionButton(
-    modifier: Modifier = Modifier,
-    enabled: Boolean,
-    onClick: () -> Unit,
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        enabled = enabled,
-        contentPadding = PaddingValues(vertical = 14.dp),
-        shape = RoundedCornerShape(14.dp),
-    ) {
-        Text(
-            text = "Entrar",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-    }
-}
-
-@Composable
-private fun loginTextFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = MaterialTheme.colorScheme.primary,
-    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-)

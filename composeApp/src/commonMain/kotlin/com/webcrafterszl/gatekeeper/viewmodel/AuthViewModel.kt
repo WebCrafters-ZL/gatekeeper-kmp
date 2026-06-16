@@ -1,23 +1,22 @@
 package com.webcrafterszl.gatekeeper.viewmodel
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.webcrafterszl.gatekeeper.data.model.LoginRequest
 import com.webcrafterszl.gatekeeper.data.remote.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 
 /**
  * Define os possíveis estados da UI para a tela de login.
- * Usar uma sealed interface é uma prática moderna que garante um tratamento de estados
- * exaustivo e seguro no bloco `when` do Compose.
+ * Usar uma sealed interface garante um tratamento de estados seguro no Compose.
  */
 sealed interface LoginUiState {
-    object Idle : LoginUiState // Estado inicial, nada aconteceu ainda.
-    object Loading : LoginUiState // Carregando, aguardando a resposta da rede.
-    data class Success(val token: String) : LoginUiState // Sucesso, contém o token de autenticação.
-    data class Error(val message: String) : LoginUiState // Erro, contém a mensagem a ser exibida.
+    object Idle : LoginUiState // Estado inicial, aguardando interação.
+    object Loading : LoginUiState // Estado de carregamento, aguardando a resposta da rede.
+    data class Success(val token: String) : LoginUiState // Sucesso, contém o token para navegação.
+    data class Error(val message: String) : LoginUiState // Erro, contém uma mensagem para o usuário.
 }
 
 /**
@@ -25,16 +24,18 @@ sealed interface LoginUiState {
  * Responsável por gerenciar o estado da UI e se comunicar com o AuthRepository.
  */
 class AuthViewModel(
-    // Injetamos o repositório para manter a separação de responsabilidades e facilitar testes.
+    // A injeção do repositório facilita os testes e a manutenção.
     private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
-    // Fluxo de estado para o campo de e-mail, observável pela UI.
+    // Fluxo de estado privado e mutável para o campo de e-mail.
     private val _email = MutableStateFlow("")
+    // Exposição pública e imutável do estado do e-mail para a UI.
     val email = _email.asStateFlow()
 
-    // Fluxo de estado para o campo de senha.
+    // Fluxo de estado privado e mutável para o campo de senha.
     private val _password = MutableStateFlow("")
+    // Exposição pública e imutável do estado da senha para a UI.
     val password = _password.asStateFlow()
 
     // Fluxo de estado para o estado geral da UI (Idle, Loading, Success, Error).
@@ -42,14 +43,14 @@ class AuthViewModel(
     val loginUiState = _loginUiState.asStateFlow()
 
     /**
-     * Atualiza o valor do e-mail conforme o usuário digita.
+     * Atualiza o valor do e-mail conforme o usuário digita no campo de texto.
      */
     fun onEmailChange(newEmail: String) {
         _email.value = newEmail
     }
 
     /**
-     * Atualiza o valor da senha conforme o usuário digita.
+     * Atualiza o valor da senha conforme o usuário digita no campo de texto.
      */
     fun onPasswordChange(newPassword: String) {
         _password.value = newPassword
@@ -57,11 +58,11 @@ class AuthViewModel(
 
     /**
      * Inicia o processo de login.
-     * Lançado em uma coroutine para não bloquear a thread principal.
+     * A função é executada em uma coroutine para não bloquear a thread principal.
      */
     fun login() {
         viewModelScope.launch {
-            // 1. Atualiza o estado para Loading, a UI reagirá mostrando um indicador.
+            // 1. Atualiza o estado para Loading, a UI reagirá mostrando um indicador de progresso.
             _loginUiState.value = LoginUiState.Loading
             
             try {
@@ -71,8 +72,8 @@ class AuthViewModel(
                     password = _password.value
                 )
                 
-                // 3. Chama a função de suspensão do repositório.
-                val authResponse = authRepository.fazerLogin(loginRequest)
+                // 3. Chama a função de suspensão do repositório para autenticar.
+                val authResponse = authRepository.login(loginRequest)
                 
                 // 4. Em caso de sucesso, atualiza o estado com o token recebido.
                 _loginUiState.value = LoginUiState.Success(authResponse.token)

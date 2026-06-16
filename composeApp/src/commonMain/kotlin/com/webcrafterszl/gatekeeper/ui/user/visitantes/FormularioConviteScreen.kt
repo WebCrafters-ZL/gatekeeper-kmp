@@ -18,10 +18,10 @@ import com.webcrafterszl.gatekeeper.ui.components.AppButton
 import com.webcrafterszl.gatekeeper.ui.components.AppTextField
 import com.webcrafterszl.gatekeeper.ui.utils.CpfVisualTransformation
 import com.webcrafterszl.gatekeeper.viewmodel.FormularioConviteViewModel
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
-import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -213,16 +213,12 @@ fun FormularioConviteScreen(
                     TextButton(
                         onClick = {
                             datePickerState.selectedDateMillis?.let { millis ->
-                                // Pega o fuso horário atual
-                                val tz = TimeZone.currentSystemDefault()
-                                // Tenta obter o instante do momento selecionado
                                 val selectedInstant = Instant.fromEpochMilliseconds(millis)
-                                
-                                val dataSelecionada = selectedInstant.toLocalDateTime(tz)
+                                val dataSelecionada = selectedInstant.toLocalDateTime(TimeZone.currentSystemDefault())
 
                                 // Monta a string formatada DD/MM/YYYY
-                                val dia = dataSelecionada.day.toString().padStart(2, '0')
-                                val mes = dataSelecionada.month.toString().padStart(2, '0')
+                                val dia = dataSelecionada.dayOfMonth.toString().padStart(2, '0')
+                                val mes = dataSelecionada.monthNumber.toString().padStart(2, '0')
                                 val ano = dataSelecionada.year
 
                                 dataVisita = "$dia/$mes/$ano"

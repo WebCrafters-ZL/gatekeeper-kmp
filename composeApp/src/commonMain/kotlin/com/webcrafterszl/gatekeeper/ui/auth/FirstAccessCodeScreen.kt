@@ -34,7 +34,7 @@ fun FirstAccessCodeScreen(
 ) {
 	var otpValue by remember { mutableStateOf("") }
     var isOtpFilled by remember { mutableStateOf(false) }
-	var tentouVerificar by remember { mutableStateOf(false) }
+	var verificationAttempted by remember { mutableStateOf(false) }
 	val colorScheme = MaterialTheme.colorScheme
 
 	Box(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
@@ -73,7 +73,7 @@ fun FirstAccessCodeScreen(
                         }
                     )
 
-					if (tentouVerificar && !isOtpFilled) {
+					if (verificationAttempted && !isOtpFilled) {
 						Text(
 							text = "O código deve conter exatamente 5 dígitos.",
 							style = MaterialTheme.typography.bodySmall,
@@ -87,7 +87,7 @@ fun FirstAccessCodeScreen(
 						modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
 						enabled = isOtpFilled,
 						onClick = {
-							tentouVerificar = true
+							verificationAttempted = true
 							if (isOtpFilled) {
 								onVerifyClick(otpValue)
 							}

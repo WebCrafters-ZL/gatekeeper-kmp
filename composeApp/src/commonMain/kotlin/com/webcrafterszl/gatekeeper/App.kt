@@ -27,21 +27,11 @@ import com.webcrafterszl.gatekeeper.ui.components.AppButton
 import com.webcrafterszl.gatekeeper.ui.manager.AccessLogScreen
 import com.webcrafterszl.gatekeeper.ui.manager.AccessPointScreen
 import com.webcrafterszl.gatekeeper.ui.manager.CardholderScreen
-import com.webcrafterszl.gatekeeper.ui.screens.CredencialCrudScreen
-import com.webcrafterszl.gatekeeper.ui.screens.PortadorCrudScreen
-import com.webcrafterszl.gatekeeper.ui.screens.ReservaCrudScreen
-import com.webcrafterszl.gatekeeper.ui.screens.VisitanteCrudScreen
 import com.webcrafterszl.gatekeeper.ui.user.HistoricoAcessosScreen
 import com.webcrafterszl.gatekeeper.ui.user.UserDashboardScreen
 import com.webcrafterszl.gatekeeper.ui.user.visitantes.FormularioConviteScreen
-import com.webcrafterszl.gatekeeper.ui.user.visitantes.GerenciadorConvitesScreen
 import com.webcrafterszl.gatekeeper.ui.theme.GatekeeperTheme
-import com.webcrafterszl.gatekeeper.viewmodel.CredencialViewModel
 import com.webcrafterszl.gatekeeper.viewmodel.FormularioConviteViewModel
-import com.webcrafterszl.gatekeeper.viewmodel.GerenciadorConvitesViewModel
-import com.webcrafterszl.gatekeeper.viewmodel.PortadorViewModel
-import com.webcrafterszl.gatekeeper.viewmodel.ReservaViewModel
-import com.webcrafterszl.gatekeeper.viewmodel.VisitanteViewModel
 
 @Composable
 @Preview
@@ -57,19 +47,11 @@ fun App() {
             }
         }
 
-        val portadorViewModel = remember { PortadorViewModel() }
-        val credencialViewModel = remember { CredencialViewModel() }
-        val visitanteViewModel = remember { VisitanteViewModel() }
-        val reservaViewModel = remember { ReservaViewModel() }
-        val convitesViewModel = remember { GerenciadorConvitesViewModel() }
         val formularioConviteViewModel = remember { FormularioConviteViewModel() }
 
         when (val route = navigation.currentRoute) {
             is AppRoute.Login -> LoginScreen(
                 onLoginSuccess = { _ ->
-                    // Em um cenário real, você salvaria este token de forma segura (ex: Settings/EncryptedSharedPreferences)
-                    // e decidiria a rota com base na Role do usuário (decodificando o JWT ou chamando a API).
-                    // Por enquanto, vamos direto para o painel principal:
                     navigation.navigateTo(AppRoute.Selection) 
                 },
                 onFirstAccessClick = { navigation.navigateTo(AppRoute.FirstAccessEmail) },
@@ -112,41 +94,6 @@ fun App() {
             is AppRoute.HistoricoAcessos -> HistoricoAcessosScreen(
                 onBack = { navigation.navigateTo(AppRoute.UserDashboard) }
             )
-
-            is AppRoute.AdminMenu -> MenuScreen(
-                title = "Menu Administrativo",
-                primaryLabel = "Portador",
-                onPrimary = { navigation.navigateTo(AppRoute.PortadorCrud) },
-                secondaryLabel = "Credencial RFID",
-                onSecondary = { navigation.navigateTo(AppRoute.CredencialCrud) },
-                onBack = { navigation.navigateTo(AppRoute.Selection) },
-            )
-
-            is AppRoute.PortadorCrud -> PortadorCrudScreen(
-                viewModel = portadorViewModel,
-                onBack = { navigation.navigateTo(AppRoute.AdminMenu) },
-            )
-
-            is AppRoute.CredencialCrud -> CredencialCrudScreen(
-                viewModel = credencialViewModel,
-                onBack = { navigation.navigateTo(AppRoute.AdminMenu) },
-            )
-
-            // Rotas antigas de autoatendimento, apontando para o Dashboard ao voltar
-            is AppRoute.VisitanteCrud -> VisitanteCrudScreen(
-                viewModel = visitanteViewModel,
-                onBack = { navigation.navigateTo(AppRoute.UserDashboard) },
-            )
-
-            is AppRoute.ReservaCrud -> ReservaCrudScreen(
-                viewModel = reservaViewModel,
-                onBack = { navigation.navigateTo(AppRoute.UserDashboard) },
-            )
-
-            is AppRoute.GerenciadorConvites -> GerenciadorConvitesScreen(
-                viewModel = convitesViewModel,
-                onBack = { navigation.navigateTo(AppRoute.UserDashboard) }
-            )
             
             is AppRoute.ManagerMenu -> MenuScreen(
                 title = "Painel do Gestor",
@@ -172,7 +119,14 @@ fun App() {
             )
             
             else -> {
-                // TODO: Handle other routes or show an error screen
+                Column(
+                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text("Rota não encontrada ou em desenvolvimento.", style = MaterialTheme.typography.headlineSmall)
+                    AppButton(text = "Voltar para o Login", modifier = Modifier.padding(top = 24.dp), onClick = { navigation.navigateTo(AppRoute.Login) })
+                }
             }
         }
     }

@@ -24,6 +24,9 @@ import com.webcrafterszl.gatekeeper.ui.auth.FirstAccessPasswordScreen
 import com.webcrafterszl.gatekeeper.ui.auth.LoginScreen
 import com.webcrafterszl.gatekeeper.ui.auth.SelectionScreen
 import com.webcrafterszl.gatekeeper.ui.components.AppButton
+import com.webcrafterszl.gatekeeper.ui.manager.AccessLogScreen
+import com.webcrafterszl.gatekeeper.ui.manager.AccessPointScreen
+import com.webcrafterszl.gatekeeper.ui.manager.CardholderScreen
 import com.webcrafterszl.gatekeeper.ui.screens.CredencialCrudScreen
 import com.webcrafterszl.gatekeeper.ui.screens.PortadorCrudScreen
 import com.webcrafterszl.gatekeeper.ui.screens.ReservaCrudScreen
@@ -67,7 +70,7 @@ fun App() {
                     // Em um cenário real, você salvaria este token de forma segura (ex: Settings/EncryptedSharedPreferences)
                     // e decidiria a rota com base na Role do usuário (decodificando o JWT ou chamando a API).
                     // Por enquanto, vamos direto para o painel principal:
-                    navigation.navigateTo(AppRoute.UserDashboard) 
+                    navigation.navigateTo(AppRoute.Selection) 
                 },
                 onFirstAccessClick = { navigation.navigateTo(AppRoute.FirstAccessEmail) },
             )
@@ -90,7 +93,7 @@ fun App() {
             )
 
             is AppRoute.Selection -> SelectionScreen(
-                onAdminClick = { navigation.navigateTo(AppRoute.AdminMenu) },
+                onAdminClick = { navigation.navigateTo(AppRoute.ManagerMenu) },
                 onUserClick = { navigation.navigateTo(AppRoute.UserDashboard) },
                 onLogoutClick = { navigation.navigateTo(AppRoute.Login) },
             )
@@ -144,6 +147,33 @@ fun App() {
                 viewModel = convitesViewModel,
                 onBack = { navigation.navigateTo(AppRoute.UserDashboard) }
             )
+            
+            is AppRoute.ManagerMenu -> MenuScreen(
+                title = "Painel do Gestor",
+                primaryLabel = "Dashboard de Acessos",
+                onPrimary = { navigation.navigateTo(AppRoute.ManagerAccessLogs) },
+                secondaryLabel = "Pontos de Acesso",
+                onSecondary = { navigation.navigateTo(AppRoute.ManagerAccessPoints) },
+                tertiaryLabel = "Portadores",
+                onTertiary = { navigation.navigateTo(AppRoute.ManagerCardholders) },
+                onBack = { navigation.navigateTo(AppRoute.Selection) },
+            )
+
+            is AppRoute.ManagerAccessLogs -> AccessLogScreen(
+                onBack = { navigation.navigateTo(AppRoute.ManagerMenu) }
+            )
+
+            is AppRoute.ManagerAccessPoints -> AccessPointScreen(
+                onBack = { navigation.navigateTo(AppRoute.ManagerMenu) }
+            )
+
+            is AppRoute.ManagerCardholders -> CardholderScreen(
+                onBack = { navigation.navigateTo(AppRoute.ManagerMenu) }
+            )
+            
+            else -> {
+                // TODO: Handle other routes or show an error screen
+            }
         }
     }
 }

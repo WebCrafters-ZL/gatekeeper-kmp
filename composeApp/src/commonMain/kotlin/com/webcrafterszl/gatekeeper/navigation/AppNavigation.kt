@@ -19,6 +19,12 @@ sealed interface AppRoute {
 	data object GerenciadorConvites : AppRoute
     data object FormularioConvite : AppRoute
     data object HistoricoAcessos : AppRoute
+    
+    // Novas rotas para o módulo do Gestor (Manager)
+    data object ManagerMenu : AppRoute
+    data object ManagerAccessLogs : AppRoute
+    data object ManagerAccessPoints : AppRoute
+    data object ManagerCardholders : AppRoute
 }
 
 class AppNavigation(initialRoute: AppRoute = AppRoute.Login) {

@@ -11,6 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.webcrafterszl.gatekeeper.data.model.CardholderAccessLogResponse
+import com.webcrafterszl.gatekeeper.ui.components.GatekeeperHeaderCard
+import com.webcrafterszl.gatekeeper.ui.components.GatekeeperMetricPill
+import com.webcrafterszl.gatekeeper.ui.components.GatekeeperScreenBackground
 import com.webcrafterszl.gatekeeper.viewmodel.CardholderUiState
 import com.webcrafterszl.gatekeeper.viewmodel.CardholderViewModel
 
@@ -46,38 +49,47 @@ fun CardholderDashboardScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            Text(
-                "Meus Acessos",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            when (val state = uiState) {
-                is CardholderUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+        GatekeeperScreenBackground {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(20.dp)
+            ) {
+                GatekeeperHeaderCard(
+                    title = "Meu painel",
+                    subtitle = "Visualize seus acessos e acompanhe rapidamente os status recentes.",
+                    badgeText = "CARDHOLDER",
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        GatekeeperMetricPill(label = "Acesso", value = "Últimos registros", modifier = Modifier.weight(1f))
+                        GatekeeperMetricPill(label = "Consulta", value = "Atualizada em tempo real", modifier = Modifier.weight(1f))
                     }
                 }
-                is CardholderUiState.Success -> {
-                    if (state.logs.isEmpty()) {
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                when (val state = uiState) {
+                    is CardholderUiState.Loading -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Nenhum registro encontrado.")
+                            CircularProgressIndicator()
                         }
-                    } else {
-                        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(state.logs) { log ->
-                                CardholderAccessLogCard(log)
+                    }
+                    is CardholderUiState.Success -> {
+                        if (state.logs.isEmpty()) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("Nenhum registro encontrado.")
+                            }
+                        } else {
+                            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                items(state.logs) { log ->
+                                    CardholderAccessLogCard(log)
+                                }
                             }
                         }
                     }
+                    else -> {}
                 }
-                else -> {}
             }
         }
     }
@@ -90,7 +102,9 @@ private fun CardholderAccessLogCard(log: CardholderAccessLogResponse) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),

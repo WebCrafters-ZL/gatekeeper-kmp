@@ -2,6 +2,7 @@ package com.webcrafterszl.gatekeeper.viewmodel
 
 import com.webcrafterszl.gatekeeper.data.model.CreateManagerRequest
 import com.webcrafterszl.gatekeeper.data.remote.AdminRepository
+import com.webcrafterszl.gatekeeper.util.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -25,13 +26,12 @@ class AdminViewModel(
     private val _uiState = MutableStateFlow<AdminUiState>(AdminUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    // Token simulado (em um app real, viria de injeção de dependência ou storage seguro)
-    private val token = "mock-admin-token"
-
     fun createManager(request: CreateManagerRequest) {
         viewModelScope.launch {
             _uiState.value = AdminUiState.Loading
             try {
+                // O token é lido do SessionManager antes de fazer a chamada.
+                val token = SessionManager.token ?: ""
                 adminRepository.createManager(token, request)
                 _uiState.value = AdminUiState.Success
             } catch (e: Exception) {

@@ -1,18 +1,35 @@
 package com.webcrafterszl.gatekeeper.ui.auth
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.webcrafterszl.gatekeeper.data.model.Role
 import com.webcrafterszl.gatekeeper.ui.components.AppButton
 import com.webcrafterszl.gatekeeper.ui.components.AppTextField
 import com.webcrafterszl.gatekeeper.viewmodel.AuthViewModel
@@ -24,26 +41,22 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = viewModel { AuthViewModel() },
-    onLoginSuccess: (String) -> Unit,
+    onLoginSuccess: (Role) -> Unit, // O callback agora espera um Role, não mais uma String de token.
     onFirstAccessClick: () -> Unit,
     logoContent: (@Composable () -> Unit)? = null,
 ) {
-    // Observa os estados do ViewModel usando o delegate 'by'. 
-    // A UI será recomposta automaticamente quando eles mudarem.
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
     val loginState by viewModel.loginUiState.collectAsState()
 
     val colorScheme = MaterialTheme.colorScheme
 
-    // LaunchedEffect é usado para lidar com "side effects", como a navegação.
-    // Ele será executado sempre que o 'loginState' mudar.
+    // O LaunchedEffect agora reage ao estado de sucesso e passa o perfil (Role).
     LaunchedEffect(loginState) {
         if (loginState is LoginUiState.Success) {
-            // Extrai o token do estado de sucesso e chama a função de navegação.
-            val token = (loginState as LoginUiState.Success).token
-            onLoginSuccess(token)
-            viewModel.resetState() // Limpa o estado para evitar re-navegação em recomposições.
+            val userRole = (loginState as LoginUiState.Success).role
+            onLoginSuccess(userRole)
+            viewModel.resetState()
         }
     }
 
@@ -71,7 +84,6 @@ fun LoginScreen(
                 tonalElevation = 2.dp,
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Campo de E-mail conectado ao ViewModel
                     AppTextField(
                         value = email,
                         onValueChange = { viewModel.onEmailChange(it) },
@@ -83,7 +95,6 @@ fun LoginScreen(
                         )
                     )
 
-                    // Campo de Senha conectado ao ViewModel
                     AppTextField(
                         value = password,
                         onValueChange = { viewModel.onPasswordChange(it) },
@@ -91,14 +102,13 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .padding(top = 12.dp),
                         label = "Senha",
-                        secureText = true, // AppTextField já trata a lógica de mostrar/ocultar
+                        secureText = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done,
                         )
                     )
 
-                    // Tratamento de estados da UI (Loading e Error)
                     when (val state = loginState) {
                         is LoginUiState.Loading -> {
                             CircularProgressIndicator(
@@ -115,17 +125,15 @@ fun LoginScreen(
                                 modifier = Modifier.padding(top = 8.dp)
                             )
                         }
-                        else -> {} // Idle e Success não precisam renderizar nada aqui.
+                        else -> {}
                     }
 
-                    // Botão de ação principal conectado ao ViewModel
                     AppButton(
                         text = "Entrar",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 20.dp)
                             .height(50.dp),
-                        // O botão fica desabilitado enquanto carrega ou se os campos estiverem vazios.
                         enabled = loginState !is LoginUiState.Loading && email.isNotBlank() && password.isNotBlank(),
                         onClick = { viewModel.login() },
                     )

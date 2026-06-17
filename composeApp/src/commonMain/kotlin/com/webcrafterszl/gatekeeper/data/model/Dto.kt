@@ -56,7 +56,7 @@ data class AppUserResponse(
     val id: Long,
     val fullName: String,
     val email: String,
-    val role: String, // "ADMIN", "MANAGER", "CARDHOLDER"
+    val role: Role,
     val isActive: Boolean
 )
 
@@ -82,7 +82,8 @@ data class CardholderResponse(
     val id: Long,
     val fullName: String,
     val email: String,
-    val isActive: Boolean
+    val isActive: Boolean,
+    val credentials: List<RfidCredentialResponse> = emptyList()
 )
 
 @Serializable
@@ -102,7 +103,6 @@ data class UpdateCardholderRequest(
 data class RfidCredentialResponse(
     val id: Long,
     val hexCode: String,
-    val appUserId: Long,
     val isBlocked: Boolean
 )
 

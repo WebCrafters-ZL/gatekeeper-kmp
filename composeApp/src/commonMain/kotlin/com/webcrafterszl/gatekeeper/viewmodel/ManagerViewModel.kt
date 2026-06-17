@@ -2,6 +2,7 @@ package com.webcrafterszl.gatekeeper.viewmodel
 
 import com.webcrafterszl.gatekeeper.data.model.*
 import com.webcrafterszl.gatekeeper.data.remote.ManagerRepository
+import com.webcrafterszl.gatekeeper.util.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -17,7 +18,6 @@ sealed interface ManagerUiState {
 
 /**
  * ViewModel que gerencia os fluxos do perfil Gestor (Manager).
- * Ele controla o estado das listas de pontos de acesso, portadores, credenciais e logs.
  */
 class ManagerViewModel(
     private val managerRepository: ManagerRepository = ManagerRepository()
@@ -26,7 +26,6 @@ class ManagerViewModel(
     private val _uiState = MutableStateFlow<ManagerUiState>(ManagerUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    // Estados para as listagens
     private val _accessLogs = MutableStateFlow<List<AccessLogResponse>>(emptyList())
     val accessLogs = _accessLogs.asStateFlow()
 
@@ -36,16 +35,15 @@ class ManagerViewModel(
     private val _accessPoints = MutableStateFlow<List<AccessPointResponse>>(emptyList())
     val accessPoints = _accessPoints.asStateFlow()
 
-    // Token simulado (em um cenário real, injetado ou lido de storage)
-    private val token = "mock-manager-token"
-
     /**
      * Busca a lista paginada de todos os logs de acesso.
+     * O token é lido diretamente do SessionManager no momento da chamada.
      */
     fun fetchAccessLogs() {
         viewModelScope.launch {
             _uiState.value = ManagerUiState.Loading
             try {
+                val token = SessionManager.token ?: ""
                 _accessLogs.value = managerRepository.getAccessLogs(token)
                 _uiState.value = ManagerUiState.Idle
             } catch (e: Exception) {
@@ -61,6 +59,7 @@ class ManagerViewModel(
         viewModelScope.launch {
             _uiState.value = ManagerUiState.Loading
             try {
+                val token = SessionManager.token ?: ""
                 _cardholders.value = managerRepository.getCardholders(token)
                 _uiState.value = ManagerUiState.Idle
             } catch (e: Exception) {
@@ -71,15 +70,14 @@ class ManagerViewModel(
 
     /**
      * Atualiza o status (bloqueado/desbloqueado) de uma credencial.
-     * Isso dispara uma ação no back-end que reflete via MQTT nas catracas.
      */
     fun toggleCredentialStatus(credentialId: Long, isBlocked: Boolean) {
         viewModelScope.launch {
             _uiState.value = ManagerUiState.Loading
             try {
+                val token = SessionManager.token ?: ""
                 managerRepository.updateCredentialStatus(token, credentialId, isBlocked)
                 _uiState.value = ManagerUiState.Success
-                // Em um app real, faríamos um refresh na lista de credenciais aqui
             } catch (e: Exception) {
                 _uiState.value = ManagerUiState.Error(e.message ?: "Erro ao atualizar credencial.")
             }

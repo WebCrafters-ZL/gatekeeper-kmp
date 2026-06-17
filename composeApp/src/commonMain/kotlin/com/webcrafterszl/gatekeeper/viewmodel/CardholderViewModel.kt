@@ -2,6 +2,7 @@ package com.webcrafterszl.gatekeeper.viewmodel
 
 import com.webcrafterszl.gatekeeper.data.model.CardholderAccessLogResponse
 import com.webcrafterszl.gatekeeper.data.remote.CardholderRepository
+import com.webcrafterszl.gatekeeper.util.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -25,9 +26,6 @@ class CardholderViewModel(
     private val _uiState = MutableStateFlow<CardholderUiState>(CardholderUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    // Token simulado
-    private val token = "mock-cardholder-token"
-
     /**
      * Busca o histórico de acessos do próprio usuário.
      */
@@ -35,6 +33,8 @@ class CardholderViewModel(
         viewModelScope.launch {
             _uiState.value = CardholderUiState.Loading
             try {
+                // O token é lido do SessionManager antes de fazer a chamada.
+                val token = SessionManager.token ?: ""
                 val logs = cardholderRepository.getOwnAccessLogs(token)
                 _uiState.value = CardholderUiState.Success(logs)
             } catch (e: Exception) {

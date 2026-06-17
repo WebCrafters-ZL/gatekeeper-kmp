@@ -5,7 +5,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 
 class BackendConnectivityProbe(
-    private val client: HttpClient = KtorClient.client,
+    private val client: HttpClient = KtorClient.httpClient,
 ) {
     suspend fun ping(): String {
         return runCatching {
@@ -28,4 +28,3 @@ class BackendConnectivityProbe(
         }
     }
 }
-

@@ -1,35 +1,64 @@
 package com.webcrafterszl.gatekeeper.data.remote
 
-import com.webcrafterszl.gatekeeper.data.model.AuthResponse
-import com.webcrafterszl.gatekeeper.data.model.LoginRequest
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
+import com.webcrafterszl.gatekeeper.data.model.*
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 
 /**
- * Repositório responsável pelas chamadas de rede relacionadas à autenticação.
- * Ele encapsula a lógica de comunicação com os endpoints de '/api/auth/'.
+ * Repositório para o domínio de Autenticação.
+ * Encapsula todas as chamadas de rede para os endpoints públicos em '/api/auth/'.
  */
-class AuthRepository(
-    // Injetamos o cliente Ktor para facilitar os testes e a reutilização.
-    private val client: HttpClient = KtorClient.httpClient 
-) {
+class AuthRepository(private val client: HttpClient = KtorClient.httpClient) {
 
     /**
-     * Envia as credenciais do usuário para o back-end para tentar realizar o login.
-     *
-     * @param request O objeto LoginRequest contendo e-mail e senha.
-     * @return Um objeto AuthResponse contendo a mensagem e o token JWT em caso de sucesso.
+     * Realiza o login do usuário.
      */
-    suspend fun fazerLogin(request: LoginRequest): AuthResponse {
-        // Realiza uma chamada POST para a rota 'api/auth/login'.
-        // A URL base ("http://10.0.2.2:8000/" no Android e "http://localhost:8000/" no desktop/web)
-        // já está configurada no KtorClient.
+    suspend fun login(request: LoginRequest): AuthResponse {
         return client.post("api/auth/login") {
-            // Define o corpo da requisição com o nosso objeto de login.
-            // O Ktor se encarrega de serializá-lo para JSON.
+            contentType(ContentType.Application.Json)
             setBody(request)
-        }.body() // O Ktor desserializa a resposta JSON para o nosso data class AuthResponse.
+        }.body()
+    }
+
+    /**
+     * Inicia o fluxo de recuperação de senha.
+     */
+    suspend fun forgotPassword(request: ForgotPasswordRequest) {
+        client.post("api/auth/forgot-password") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+    }
+
+    /**
+     * Conclui o fluxo de recuperação de senha.
+     */
+    suspend fun resetPassword(request: ResetPasswordRequest) {
+        client.post("api/auth/reset-password") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+    }
+    
+    /**
+     * Valida um código OTP (One-Time Password).
+     */
+    suspend fun validateOtp(request: ValidateOtpRequest) {
+        client.post("api/auth/validate-otp") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+    }
+
+    /**
+     * Permite que um novo usuário configure sua senha pela primeira vez.
+     */
+    suspend fun setupPassword(request: SetupPasswordRequest) {
+        client.post("api/auth/setup-password") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
     }
 }

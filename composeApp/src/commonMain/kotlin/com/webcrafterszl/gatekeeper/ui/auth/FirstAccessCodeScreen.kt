@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.webcrafterszl.gatekeeper.ui.components.AppButton
 import com.webcrafterszl.gatekeeper.ui.components.OtpTextField
+import com.webcrafterszl.gatekeeper.ui.components.GatekeeperHeaderCard
+import com.webcrafterszl.gatekeeper.ui.components.GatekeeperScreenBackground
 
 @Composable
 fun FirstAccessCodeScreen(
@@ -34,75 +36,60 @@ fun FirstAccessCodeScreen(
 ) {
 	var otpValue by remember { mutableStateOf("") }
     var isOtpFilled by remember { mutableStateOf(false) }
-	var tentouVerificar by remember { mutableStateOf(false) }
+	var verificationAttempted by remember { mutableStateOf(false) }
 	val colorScheme = MaterialTheme.colorScheme
 
-	Box(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
+	GatekeeperScreenBackground {
 		Column(
 			modifier = Modifier.fillMaxSize().padding(24.dp),
 			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
-			Surface(
-				modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp),
-				color = colorScheme.surface,
-				shape = RoundedCornerShape(20.dp),
-				tonalElevation = 2.dp,
+			GatekeeperHeaderCard(
+				title = "Verificação de acesso",
+				subtitle = "Digite o código de 5 dígitos enviado para o e-mail $email.",
+				badgeText = "Etapa 2 de 3",
+				modifier = Modifier.fillMaxWidth().widthIn(max = 520.dp),
 			) {
-				Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+				OtpTextField(
+					modifier = Modifier.padding(top = 8.dp),
+					otpText = otpValue,
+					otpCount = 5,
+					onOtpTextChange = { value, isComplete ->
+						otpValue = value
+						isOtpFilled = isComplete
+					}
+				)
+
+				if (verificationAttempted && !isOtpFilled) {
 					Text(
-						text = "Verificação",
-						style = MaterialTheme.typography.headlineSmall,
-						color = colorScheme.tertiary,
-						fontWeight = FontWeight.SemiBold,
-					)
-					Text(
-						text = "Digite o código de 5 dígitos enviado para o e-mail $email.",
-						style = MaterialTheme.typography.bodyMedium,
-						color = colorScheme.onSurfaceVariant,
+						text = "O código deve conter exatamente 5 dígitos.",
+						style = MaterialTheme.typography.bodySmall,
+						color = colorScheme.error,
 						modifier = Modifier.padding(top = 6.dp),
 					)
+				}
 
-                    OtpTextField(
-                        modifier = Modifier.padding(top = 20.dp),
-                        otpText = otpValue,
-                        otpCount = 5,
-                        onOtpTextChange = { value, isComplete ->
-                            otpValue = value
-                            isOtpFilled = isComplete
-                        }
-                    )
+				AppButton(
+					text = "Verificar Código",
+					modifier = Modifier.fillMaxWidth().padding(top = 24.dp).height(52.dp),
+					enabled = isOtpFilled,
+					onClick = {
+						verificationAttempted = true
+						if (isOtpFilled) {
+							onVerifyClick(otpValue)
+						}
+					},
+				)
 
-					if (tentouVerificar && !isOtpFilled) {
-						Text(
-							text = "O código deve conter exatamente 5 dígitos.",
-							style = MaterialTheme.typography.bodySmall,
-							color = colorScheme.error,
-							modifier = Modifier.padding(top = 6.dp),
-						)
-					}
-
-					AppButton(
-						text = "Verificar Código",
-						modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-						enabled = isOtpFilled,
-						onClick = {
-							tentouVerificar = true
-							if (isOtpFilled) {
-								onVerifyClick(otpValue)
-							}
-						},
-					)
-
-					OutlinedButton(
-						onClick = onBackClick,
-						modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-						colors = ButtonDefaults.outlinedButtonColors(
-							contentColor = colorScheme.primary,
-						),
-					) {
-						Text("Voltar")
-					}
+				OutlinedButton(
+					onClick = onBackClick,
+					modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(52.dp),
+					colors = ButtonDefaults.outlinedButtonColors(
+						contentColor = colorScheme.primary,
+					),
+				) {
+					Text("Voltar")
 				}
 			}
 		}

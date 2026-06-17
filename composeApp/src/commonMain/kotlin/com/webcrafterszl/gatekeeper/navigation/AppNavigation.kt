@@ -3,39 +3,45 @@ package com.webcrafterszl.gatekeeper.navigation
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.webcrafterszl.gatekeeper.data.model.Role
 
 sealed interface AppRoute {
-	data object Login : AppRoute
-	data object FirstAccessEmail : AppRoute
-	data class FirstAccessCode(val email: String) : AppRoute
-	data class FirstAccessPassword(val email: String) : AppRoute
-	data object Selection : AppRoute
-	data object AdminMenu : AppRoute
-	data object UserDashboard : AppRoute
-	data object PortadorCrud : AppRoute
-	data object CredencialCrud : AppRoute
-	data object VisitanteCrud : AppRoute
-	data object ReservaCrud : AppRoute
-	data object GerenciadorConvites : AppRoute
-    data object FormularioConvite : AppRoute
-    data object HistoricoAcessos : AppRoute
+    // Fluxo de Autenticação
+    object Login : AppRoute
+    object FirstAccessEmail : AppRoute
+    data class FirstAccessCode(val email: String) : AppRoute
+    data class FirstAccessPassword(val email: String) : AppRoute
+
+    // Dashboards por Perfil
+    object AdminDashboard : AppRoute
+    object ManagerDashboard : AppRoute
+    object CardholderDashboard : AppRoute
     
-    // Novas rotas para o módulo do Gestor (Manager)
-    data object ManagerMenu : AppRoute
-    data object ManagerAccessLogs : AppRoute
-    data object ManagerAccessPoints : AppRoute
-    data object ManagerCardholders : AppRoute
+    // Telas internas (exemplo)
+    object FormularioConvite : AppRoute
+    object HistoricoAcessos : AppRoute
 }
 
 class AppNavigation(initialRoute: AppRoute = AppRoute.Login) {
-	var currentRoute by mutableStateOf<AppRoute>(initialRoute)
-		private set
+    var currentRoute by mutableStateOf<AppRoute>(initialRoute)
+        private set
 
-	fun navigateTo(route: AppRoute) {
-		currentRoute = route
-	}
+    fun navigateTo(route: AppRoute) {
+        currentRoute = route
+    }
 
-	fun goBackToSelection() {
-		currentRoute = AppRoute.Selection
-	}
+    /**
+     * Navega para o dashboard apropriado com base no perfil do usuário,
+     * limpando a pilha de navegação para que o usuário não possa voltar para o login.
+     * Neste modelo de navegação simples, a "limpeza de pilha" é implícita,
+     * pois simplesmente substituímos a rota atual.
+     */
+    fun navigateToDashboard(role: Role?) {
+        currentRoute = when (role) {
+            Role.ADMIN -> AppRoute.AdminDashboard
+            Role.MANAGER -> AppRoute.ManagerDashboard
+            Role.CARDHOLDER -> AppRoute.CardholderDashboard
+            else -> AppRoute.Login // Rota de fallback caso o perfil seja nulo/inválido
+        }
+    }
 }

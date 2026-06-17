@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.webcrafterszl.gatekeeper.ui.components.AppButton
 import com.webcrafterszl.gatekeeper.ui.components.AppTextField
+import com.webcrafterszl.gatekeeper.ui.components.GatekeeperHeaderCard
+import com.webcrafterszl.gatekeeper.ui.components.GatekeeperScreenBackground
 
 @Composable
 fun FirstAccessPasswordScreen(
@@ -34,92 +36,79 @@ fun FirstAccessPasswordScreen(
 ) {
 	var password by remember { mutableStateOf("") }
 	var confirmPassword by remember { mutableStateOf("") }
-	var tentouSalvar by remember { mutableStateOf(false) }
+	var saveAttempted by remember { mutableStateOf(false) }
 	val colorScheme = MaterialTheme.colorScheme
 
-	val senhaValida = password.length >= 6
-	val senhasCoincidem = password == confirmPassword
-	val formularioValido = senhaValida && senhasCoincidem
+	val isPasswordValid = password.length >= 6
+	val passwordsMatch = password == confirmPassword
+	val isFormValid = isPasswordValid && passwordsMatch
 
-	Box(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
+	GatekeeperScreenBackground {
 		Column(
 			modifier = Modifier.fillMaxSize().padding(24.dp),
 			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
-			Surface(
-				modifier = Modifier.fillMaxWidth().widthIn(max = 460.dp),
-				color = colorScheme.surface,
-				shape = RoundedCornerShape(20.dp),
-				tonalElevation = 2.dp,
+			GatekeeperHeaderCard(
+				title = "Criar senha",
+				subtitle = "Defina uma nova senha para o e-mail $email.",
+				badgeText = "Etapa 3 de 3",
+				modifier = Modifier.fillMaxWidth().widthIn(max = 520.dp),
 			) {
-				Column(modifier = Modifier.padding(20.dp)) {
+				AppTextField(
+					value = password,
+					onValueChange = { password = it },
+					label = "Nova senha",
+					modifier = Modifier.padding(top = 8.dp),
+					secureText = true,
+					isError = saveAttempted && !isPasswordValid,
+				)
+				if (saveAttempted && !isPasswordValid) {
 					Text(
-						text = "Cadastrar Senha",
-						style = MaterialTheme.typography.headlineSmall,
-						color = colorScheme.tertiary,
-						fontWeight = FontWeight.SemiBold,
-					)
-					Text(
-						text = "Crie uma senha para o e-mail $email.",
-						style = MaterialTheme.typography.bodyMedium,
-						color = colorScheme.onSurfaceVariant,
+						text = "A senha deve ter pelo menos 6 caracteres.",
+						style = MaterialTheme.typography.bodySmall,
+						color = colorScheme.error,
 						modifier = Modifier.padding(top = 6.dp),
 					)
+				}
 
-					AppTextField(
-						value = password,
-						onValueChange = { password = it },
-						label = "Nova Senha",
-						modifier = Modifier.padding(top = 20.dp),
-						secureText = true,
+				AppTextField(
+					value = confirmPassword,
+					onValueChange = { confirmPassword = it },
+					label = "Confirmar senha",
+					modifier = Modifier.padding(top = 12.dp),
+					secureText = true,
+					isError = saveAttempted && !passwordsMatch,
+				)
+				if (saveAttempted && !passwordsMatch) {
+					Text(
+						text = "As senhas não coincidem.",
+						style = MaterialTheme.typography.bodySmall,
+						color = colorScheme.error,
+						modifier = Modifier.padding(top = 6.dp),
 					)
-					if (tentouSalvar && !senhaValida) {
-						Text(
-							text = "A senha deve ter pelo menos 6 caracteres.",
-							style = MaterialTheme.typography.bodySmall,
-							color = colorScheme.error,
-							modifier = Modifier.padding(top = 6.dp),
-						)
-					}
+				}
 
-					AppTextField(
-						value = confirmPassword,
-						onValueChange = { confirmPassword = it },
-						label = "Confirmar Senha",
-						modifier = Modifier.padding(top = 12.dp),
-						secureText = true,
-					)
-					if (tentouSalvar && !senhasCoincidem) {
-						Text(
-							text = "As senhas não coincidem.",
-							style = MaterialTheme.typography.bodySmall,
-							color = colorScheme.error,
-							modifier = Modifier.padding(top = 6.dp),
-						)
-					}
+				AppButton(
+					text = "Salvar senha",
+					modifier = Modifier.fillMaxWidth().padding(top = 24.dp).height(52.dp),
+					enabled = isFormValid,
+					onClick = {
+						saveAttempted = true
+						if (isFormValid) {
+							onSetPasswordClick(password)
+						}
+					},
+				)
 
-					AppButton(
-						text = "Salvar Senha",
-						modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-						enabled = formularioValido,
-						onClick = {
-							tentouSalvar = true
-							if (formularioValido) {
-								onSetPasswordClick(password)
-							}
-						},
-					)
-
-					OutlinedButton(
-						onClick = onBackClick,
-						modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-						colors = ButtonDefaults.outlinedButtonColors(
-							contentColor = colorScheme.primary,
-						),
-					) {
-						Text("Voltar")
-					}
+				OutlinedButton(
+					onClick = onBackClick,
+					modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(52.dp),
+					colors = ButtonDefaults.outlinedButtonColors(
+						contentColor = colorScheme.primary,
+					),
+				) {
+					Text("Voltar")
 				}
 			}
 		}
